@@ -9,4 +9,6 @@ def export_excel(s,path):
  with pd.ExcelWriter(Path(path),engine="xlsxwriter") as w:
   write(w,meta,"Summary")
   for name,key in SHEETS:write(w,s["data"].get(key,[]),name)
+  if "fieldUsage" in s["data"]:write(w,s["data"]["fieldUsage"],"Custom Field Usage")
+  if s["metadata"].get("coverage"):write(w,[{"Area":key,"Coverage":value} for key,value in s["metadata"]["coverage"].items()],"Usage Coverage")
   for name,key in REL:write(w,s["relations"].get(key,[]),name)

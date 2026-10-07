@@ -1,4 +1,4 @@
-# Jira Snapshot Stage 6
+# Jira Snapshot Stage 7
 
 ## Credentials and publishing
 
@@ -47,4 +47,22 @@ Missing collections and field schemes without confirmed API availability in both
 
 Excel includes Summary, Metadata, Warnings, and separate Added/Removed/Changed sheets for objects and relations. Each changed field has its own Excel row; summary counts refer to objects/relations, not field rows. JSON preserves complete records; oversized Excel cells are truncated with an explicit pointer to JSON.
 
-Only fields already collected by the snapshot are compared. Counts alone cannot detect changes to uncollected details. Keep collection permissions consistent: a disappearance can reflect API visibility rather than actual deletion. Added objects are review candidates, not automatic cleanup recommendations; Cleanup Advisor remains Stage 7.
+Only fields already collected by the snapshot are compared. Counts alone cannot detect changes to uncollected details. Keep collection permissions consistent: a disappearance can reflect API visibility rather than actual deletion. Added objects are review candidates, not automatic cleanup recommendations.
+
+## Stage 7 Cleanup Advisor
+
+Stage 7 snapshots use schema version `6` and capture Jira-reported custom-field last-used signals and context, screen, and project counts, plus transition screen references exposed by workflow search. These are evidence only: Jira may not track a field's usage, and filters/JQL, issue values, automation, apps, integrations, team-managed projects, and account permissions can hide dependencies. The new evidence reuses existing API responses and adds no extra requests. Snapshot diffs match field-usage records by `fieldId`.
+
+Run the advisor against the after-migration snapshot (or another JSON snapshot) without Jira credentials or Jira API calls:
+
+```powershell
+python .\cleanup_advisor.py
+python .\cleanup_advisor.py .\snapshots\migration_snapshot.json
+python .\cleanup_advisor.py --input .\snapshots\migration_snapshot.json --output-dir .\snapshots\advice
+```
+
+With no input, `snapshots\snapshot_b.json` next to the script is used. The advisor writes UTF-8 `cleanup_advice_<timestamp>.json` and `.xlsx` reports. Legacy snapshots are labeled insufficient for usage and orphan analysis; missing collections or evidence are not treated as proof of non-use.
+
+Recommendations identify review candidates for custom fields, duplicate statuses and priorities, inactive/unreferenced workflows, screens with no observed screen-scheme/workflow reference, and permission grants for anonymous/public or common broad authenticated groups. Status duplicates are compared within scope and category; same-name priorities and inactive workflows are candidates only, not presumed duplicates or unused. In particular, incomplete screen references, workflow drafts, project types, saved filters, apps, and effective permission assignments require administrator review.
+
+The advisor is offline and read-only. It never deletes objects or recommends automatic deletion. Confirm dependencies, ownership, effective permissions, and operational impact with Jira/project administrators before making any configuration change.

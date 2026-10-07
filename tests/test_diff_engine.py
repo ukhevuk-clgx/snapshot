@@ -26,6 +26,17 @@ def snapshot(data=None, relations=None):
 
 
 class DiffEngineTests(unittest.TestCase):
+    def test_stage7_field_usage_is_matched_by_field_id(self):
+        before = snapshot({"fieldUsage": [{"fieldId": "customfield_1", "screensCount": 0}]})
+        after = snapshot({"fieldUsage": [
+            {"fieldId": "customfield_1", "screensCount": 1},
+            {"fieldId": "customfield_2", "screensCount": 0},
+        ]})
+        report = compare_snapshots(before, after)
+        self.assertEqual(report["totals"]["objects"], {"added": 1, "removed": 0, "changed": 1})
+        self.assertEqual(report["objects"]["fieldUsage"]["changed"][0]["identity"],
+                         {"fieldId": "customfield_1"})
+
     def test_all_inventory_collections_are_compared(self):
         data = {key: [{"id": "1", "name": key}] for _, key in SHEETS}
         data["workflows"][0]["id"] = {"entityId": "uuid", "name": "workflows"}

@@ -68,6 +68,8 @@ def _id(value, label, nullable=False):
 
 def _identity(section, name, row):
     if section == "data":
+        if name == "fieldUsage":
+            return {"fieldId": _id(row.get("fieldId"), "fieldUsage.fieldId")}
         value = row.get("id")
         if name == "workflows" and isinstance(value, dict):
             entity_id = value.get("entityId")
