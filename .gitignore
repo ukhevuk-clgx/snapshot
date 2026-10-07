@@ -1,0 +1,13 @@
+__pycache__/
+*.py[cod]
+.venv/
+snapshots/*
+!snapshots/.gitkeep
+.idea/
+.vscode/
+.jira-credentials.json
+.env
+.env.*
+!.env.example
+config_local.py
+*.log
